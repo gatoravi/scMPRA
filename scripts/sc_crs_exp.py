@@ -98,15 +98,10 @@ def extract_sc_pBC_normed_exp(sexa_df):
         rBC = str(line[['rBC']].values)
         if key not in pop_dict:
             pop_dict[key] = {}
-            if rBC not in pop_dict[key]:
-                pop_dict[key][rBC] = 1
-            else:
-                pop_dict[key][rBC] += 1
+        if rBC not in pop_dict[key]:
+            pop_dict[key][rBC] = 1
         else:
-            if rBC not in pop_dict[key]:
-                pop_dict[key][rBC] = 1
-            else:
-                pop_dict[key][rBC] += 1
+            pop_dict[key][rBC] += 1
     pop_list = []
     for key in pop_dict:
         info = list(key)
