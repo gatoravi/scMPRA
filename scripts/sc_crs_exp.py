@@ -109,8 +109,8 @@ def extract_sc_pBC_normed_exp(sexa_df):
         normalization_factor = cell_umi_dict[current_cell]
         num_plasmid = len(pop_dict[key])
         exp = sum(pop_dict[key].values())
-        # The proper normalization for the expression in a cell is the total
-        # number of UMI divided by the number of plasmids it has 
+        # The proper normalization factor for the expression in a cell is the total
+        # number of UMI divided by the number of plasmids it has (UMIs/plasmid)
         norm_exp = ((exp/num_plasmid)/normalization_factor)*1000
         info.append(norm_exp)
         info.append(exp)
@@ -212,25 +212,29 @@ def main():
     # Add the name for the output file
     parser.add_argument('--out', help='output file name', required=True)
     parser.add_argument('--exp', help = 'name of the experiment', required = True)
+    parser.add_argument('--readcutoff', help = 'minimum reads per quad', required = True, type = int)
     # Grab input arguments
     args= parser.parse_args()
     # Read in the quint file with columns as cellBC, umi, pBC,rBC, counts, cluster
     prom_quint = pd.read_csv(args.quint, sep= '\t')
     # Read in the promoter lib infor
     prom_lib_info = pd.read_csv(args.promlib, sep= '\t')
+    print("Attaching promoter to quad", file = sys.stderr)
     # Add promoter id to the quint file
     prom_sext = attach_promoter_to_quad(prom_quint, prom_lib_info)
+    print("Filtering based on reads", file = sys.stderr)
     # Return abundant cells more than x read per umi
-    prom_filtered = filter_based_on_umi(prom_sext, min_count =0)
-    # Return cells with more than 10 UMIs 
+    prom_filtered = filter_based_on_umi(prom_sext, min_count = args.readcutoff)
+    print("Filtering cells based on UMIs", file = sys.stderr)
+    # Return cells with more than X UMIs
     prom_filtered_abundant = return_abundant_cells(prom_filtered, min_umi = 100)
+    print("Computing expression values", file = sys.stderr)
     # Return the file containing the single-cell expression for each cBC
     sc_exp = extract_sc_pBC_normed_exp(prom_filtered_abundant)
     sc_exp.to_csv('./' + args.exp + '_cBC_exp_' + args.out + '.csv',index = False)
     # Return the expression mean, auc, median absolution deviation, variance for each CRS
     sc_stats = return_pBC_mean_exp_percell(sc_exp)
     sc_stats.to_csv('./'+ args.exp + '_cBC_stats_' + args.out + '.csv',index = False)
+
 if __name__ == "__main__":
     main()
-
-
