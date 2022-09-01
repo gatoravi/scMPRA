@@ -119,8 +119,10 @@ def extract_sc_pBC_normed_exp(sexa_df):
         norm_exp = ((exp/num_plasmid)/normalization_factor)*1000
         info.append(norm_exp)
         info.append(exp)
+        info.append(num_plasmid)
+        info.append(normalization_factor)
         pop_list.append(info)
-    sc_measurement_df = pd.DataFrame(pop_list,  columns= ['cellBC', 'prom_id', 'pBC', 'norm_exp' , 'direct_exp'])
+    sc_measurement_df = pd.DataFrame(pop_list,  columns= ['cellBC', 'prom_id', 'pBC', 'norm_exp' , 'direct_exp', 'num_plasmid', 'normalization_factor'])
     return sc_measurement_df
 
 def filter_based_on_umi(sext_df, min_count = 2):
