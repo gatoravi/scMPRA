@@ -234,7 +234,7 @@ def main():
     sc_exp.to_csv('./' + args.exp + '_cBC_exp_' + args.out + '.csv',index = False)
     # Return the expression mean, auc, median absolution deviation, variance for each CRS
     sc_stats = return_pBC_mean_exp_percell(sc_exp)
-    sc_exp.to_csv('./'+ args.exp + '_cBC_stats_' + args.out + '.csv',index = False)
+    sc_stats.to_csv('./'+ args.exp + '_cBC_stats_' + args.out + '.csv',index = False)
 if __name__ == "__main__":
     main()
 
