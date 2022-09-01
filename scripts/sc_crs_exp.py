@@ -13,16 +13,16 @@ import argparse
 
 def return_abundant_cells(df, min_umi = 100):
     umi_dict = {}
+    abundant_list = []
     for _, row in df.iterrows():
         cell_bc = row['cellBC']
-        if cell_bc not in umi_dict:
-            umi_dict[cell_bc] = 1
-        else:
-            umi_dict[cell_bc] +=1
-    abundant_list = []
-    for key in umi_dict:
-        if umi_dict[key] > min_umi:
-            abundant_list.append(key)
+        if cell_bc not in abundant_list:
+            if cell_bc not in umi_dict:
+                umi_dict[cell_bc] = 1
+            else:
+                umi_dict[cell_bc] +=1
+            if umi_dict[cell_bc] > min_umi:
+                abundant_list.append(cell_bc)
     # Slice the dataset
     pop_df = df[df['cellBC'].isin(abundant_list)]
     return pop_df
