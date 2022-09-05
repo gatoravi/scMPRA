@@ -5,10 +5,12 @@ import csv
 Take the scmpra object and convert to a promoter by cell matrix that can be used with MPRAnalyze
 Input 1 - the csv from Siqi's script sc_crs_exp.py
 Input 2 - prefix for output file
+Input 3 - "replicate number" - this will be appended to all the cell names
 """
 
 scmpra = sys.argv[1]
 prefix = sys.argv[2]
+rep = sys.argv[3]
 
 cellbcs = []
 prombcs = []
@@ -22,7 +24,7 @@ with open(scmpra) as scmpra_fh:
     reader = csv.DictReader(scmpra_fh)
     for line in reader:
         print(line["pBC"], line["cellBC"], line)
-        cell = line['cellBC']
+        cell = line['cellBC'] + "_" + rep
         promoter = line['pBC']
         if cell not in cellbcs:
             cellbcs.append(cell)
@@ -64,3 +66,8 @@ with open (prefix + "_numplasmid.tsv", "w") as numplasmid_fh:
 
 with open (prefix + "_directexp.tsv", "w") as directexp_fh:
     write_to_file(directexp_cellbcs_promotercounts, directexp_fh)
+
+with open (prefix + "_colannot.tsv", "w") as colannot_fh:
+    print("cellBC", "cell", "rep", file = colannot_fh)
+    for cell in cellbcs:
+        print("\t".join([cell, cell, rep]), file = colannot_fh)
