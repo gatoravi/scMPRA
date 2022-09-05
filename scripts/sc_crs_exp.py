@@ -12,6 +12,7 @@ import pickle
 import argparse
 
 def return_abundant_cells(df, min_umi = 100):
+    print("Number of rows before UMI filter is ", df.shape)
     umi_dict = {}
     abundant_list = []
     for _, row in df.iterrows():
@@ -24,10 +25,14 @@ def return_abundant_cells(df, min_umi = 100):
             if umi_dict[cell_bc] > min_umi:
                 abundant_list.append(cell_bc)
     # Slice the dataset
-    pop_df = df[df['cellBC'].isin(abundant_list)]
-    return pop_df
+    print("Filtering the dataset based on abundant cells")
+    df = df[df['cellBC'].isin(abundant_list)]
+    print("Number of rows after UMI filter is ", df.shape)
+    return df
 
 def attach_promoter_to_quad(quad_df, info_df):
+    quad_df = quad_df.merge(info_df, on = "pBC")
+    """
     pop_list = []
     for _, line in quad_df.iterrows():
         pBC = line['pBC']
@@ -35,7 +40,8 @@ def attach_promoter_to_quad(quad_df, info_df):
             prom_id = str(info_df[info_df['pBC'] == pBC]['prom_id'].values[0])
             pop_list.append([line['cellBC'], line['umi'], prom_id, line['pBC'], line['rBC'], line['counts']])
     sexa = pd.DataFrame(pop_list,columns= ['cellBC', 'umi', 'prom_id', 'pBC', 'rBC', 'counts'])
-    return sexa
+    """
+    return quad_df
 
 def extract_sc_pBC_exp(sexa_df):
     '''
@@ -126,8 +132,12 @@ def filter_based_on_umi(sext_df, min_count = 2):
     Output: the unique sext that are supported by more than 1 read. 
     '''
     cell_list = list(set(sext_df['cellBC'].values))
+    ncells = len(cell_list)
     pop_list = []
+    i = 1
     for cells in cell_list:
+        print("doing cell ", i, "out of ", ncells)
+        i += 1
         cell_df = sext_df[sext_df['cellBC'] == cells]
         cell_list = list(set(sext_df['cellBC'].values))
         high_count_slice = cell_df[cell_df['counts'] > min_count]
@@ -222,12 +232,12 @@ def main():
     print("Attaching promoter to quad", file = sys.stderr)
     # Add promoter id to the quint file
     prom_sext = attach_promoter_to_quad(prom_quint, prom_lib_info)
-    print("Filtering based on reads", file = sys.stderr)
-    # Return abundant cells more than x read per umi
-    prom_filtered = filter_based_on_umi(prom_sext, min_count = args.readcutoff)
     print("Filtering cells based on UMIs", file = sys.stderr)
     # Return cells with more than X UMIs
-    prom_filtered_abundant = return_abundant_cells(prom_filtered, min_umi = 100)
+    prom_filtered = return_abundant_cells(prom_sext, min_umi = 100)
+    print("Filtering based on reads", file = sys.stderr)
+    # Return abundant cells more than x read per umi
+    prom_filtered_abundant = filter_based_on_umi(prom_filtered, min_count = args.readcutoff)
     print("Computing expression values", file = sys.stderr)
     # Return the file containing the single-cell expression for each cBC
     sc_exp = extract_sc_pBC_normed_exp(prom_filtered_abundant)
