@@ -1,0 +1,12 @@
+require(MPRAnalyze)
+colannot <- read.table("test1_colannot.tsv", head = T, row.names = 1)
+rna <- read.table("test1_numplasmid.tsv", head = T, row.names = 1)
+dna <- read.table("test1_numplasmid.tsv", head = T, row.names = 1)
+obj <- MpraObject(dnaCounts = as.matrix(dna), rnaCounts = as.matrix(rna), dnaAnnot = colannot, rnaAnnot = colannot)
+obj <- estimateDepthFactors(obj, lib.factor = c("batch"), which.lib = "both", depth.estimator="uq")
+obj <- analyzeQuantification(obj = obj, dnaDesign = ~ batch)
+alphas <- getAlpha(obj)
+print(alphas)
+
+save(alphas, file = "test1_alphas.Robj")
+save(obj, file = "test1_obj.Robj")
