@@ -37,36 +37,38 @@ with open(scmpra) as scmpra_fh:
     reader = csv.DictReader(scmpra_fh)
     for line in reader:
         #print(line["pBC"], line["cellBC"], line)
-        cell = line['cellBC'] + "_" + rep
+        cell = line['cellBC'] + "_" + rep #Use the replicate to avoid collisions
         pBC = line['pBC']
-        promoter = pBC
         promotername = pBC_promotername[pBC]
-        cell = cell + "_" + promotername
+        promoter = promotername #use the name here
         if cell not in cellbcs:
             cellbcs.append(cell)
         if pBC not in prombcs:
             prombcs.append(pBC)
+        if promotername not in promoters:
+            promoters.append(promotername)
         if cell not in numplasmid_cellbcs_promotercounts:
             numplasmid_cellbcs_promotercounts[cell] = {}
             directexp_cellbcs_promotercounts[cell] = {}
             normexp_cellbcs_promotercounts[cell] = {}
         if promoter not in numplasmid_cellbcs_promotercounts[cell]:
-            numplasmid_cellbcs_promotercounts[cell][promoter] = {}
-            directexp_cellbcs_promotercounts[cell][promoter] = {}
-            normexp_cellbcs_promotercounts[cell][promoter] = {}
-        numplasmid_cellbcs_promotercounts[cell][promoter] = line["num_plasmid"]
-        directexp_cellbcs_promotercounts[cell][promoter] = line["direct_exp"]
-        normexp_cellbcs_promotercounts[cell][promoter] = line["norm_exp"]
+            numplasmid_cellbcs_promotercounts[cell][promoter] = 0
+            directexp_cellbcs_promotercounts[cell][promoter] = 0
+            normexp_cellbcs_promotercounts[cell][promoter] = 0
+        numplasmid_cellbcs_promotercounts[cell][promoter] += float(line["num_plasmid"]) #sum over all pBCs
+        directexp_cellbcs_promotercounts[cell][promoter] += float(line["direct_exp"])#sum over all pBCs
+        normexp_cellbcs_promotercounts[cell][promoter] += float(line["norm_exp"])#sum over all pBCs
 
 print("Number of cells is ", len(cellbcs))
 print("Number of promoter barcodes is ", len(prombcs))
+print("Number of promoters is ", len(promoters))
 
 def write_to_file(data, fh):
-    header = ["pBC"]
+    header = ["promoter"]
     for cellbc in cellbcs:
         header.append(cellbc)
     print("\t".join(header), file = fh) #Header
-    for promoter in prombcs:
+    for promoter in promoters:
         output = []
         output.append(promoter)
         for cell in cellbcs:
