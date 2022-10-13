@@ -144,6 +144,7 @@ def extract_sc_pBC_normed_exp(sexa_df):
         temp_key = line[['cellBC', 'name','pBC', 'cluster']]
         key = tuple(temp_key.values)
         rBC = str(line[['rBC']].values[0])
+        print("rBC", rBC)
         if rBC == '0':
             if key not in pop_dict:
                 pop_dict[key] = {}
@@ -151,16 +152,12 @@ def extract_sc_pBC_normed_exp(sexa_df):
         else:
             if key not in pop_dict:
                 pop_dict[key] = {}
-                if rBC not in pop_dict[key]:
-                    pop_dict[key][rBC] = 1
-                else:
-                    pop_dict[key][rBC] += 1
+            if rBC not in pop_dict[key]:
+                pop_dict[key][rBC] = 1
             else:
-                if rBC not in pop_dict[key]:
-                    pop_dict[key][rBC] = 1
-                else:
-                    pop_dict[key][rBC] += 1
+                pop_dict[key][rBC] += 1
     pop_list = []
+    print(pop_dict)
     print('finished counting')
     for key in pop_dict:
         info = list(key)
@@ -168,13 +165,17 @@ def extract_sc_pBC_normed_exp(sexa_df):
         num_plasmid = len(pop_dict[key])
         # If we got an zero here 
         if any(list(pop_dict[key].keys())) == '0':
-            exp = 0
+            norm_exp = 0
+            direct_exp = 0
         else:
-            exp = sum(pop_dict[key].values())/num_plasmid
+            norm_exp = sum(pop_dict[key].values())/num_plasmid
+            direct_exp = sum(pop_dict[key].values())
         # The proper normalization for the expression in a cell is the total
-        info.append(exp)
+        info.append(direct_exp)
+        info.append(norm_exp)
+        info.append(num_plasmid)
         pop_list.append(info)
-    sc_measurement_df = pd.DataFrame(pop_list,  columns= ['cellBC', 'name', 'pBC', 'cluster','direct_exp'])
+    sc_measurement_df = pd.DataFrame(pop_list,  columns= ['cellBC', 'name', 'pBC', 'cluster', 'direct_exp', 'norm_exp', 'num_plasmid'])
     return sc_measurement_df
 
 
